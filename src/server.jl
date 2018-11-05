@@ -62,7 +62,7 @@ end
 
 # gRPC server implementation
 # 
-type gRPCServer
+mutable struct gRPCServer
     sock::TCPServer
     services::Dict{String, ProtoService}
     run::Bool

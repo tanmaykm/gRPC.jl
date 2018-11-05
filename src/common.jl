@@ -1,5 +1,5 @@
 # gRPCController only keeps a debug flag as of now
-type gRPCController <: ProtoRpcController
+mutable struct gRPCController <: ProtoRpcController
     debug::Bool
 end
 
@@ -7,7 +7,7 @@ debug_log(controller::gRPCController, msg) = controller.debug && println(msg)
 error_log(controller::gRPCController, msg) = println(STDERR, msg)
 
 # gRPCChannel implementation
-type gRPCChannel <: ProtoRpcChannel
+mutable struct gRPCChannel <: ProtoRpcChannel
     session::HTTPConnection
     stream_id::UInt32
 
@@ -25,7 +25,7 @@ function to_delimited_message_bytes(msg)
     take!(iob)
 end
 
-function from_delimited_message_bytes{T}(data, t::T)
+function from_delimited_message_bytes(data, t)
     iob = IOBuffer(data)
     compressed = read(iob, UInt8)
     datalen = ntoh(read(iob, UInt32))
