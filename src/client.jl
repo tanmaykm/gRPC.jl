@@ -69,7 +69,7 @@ end
 
 # gRPC client implementation
 # 
-type gRPCClient
+mutable struct gRPCClient
     sock::TCPSocket
     channel::gRPCChannel
 
