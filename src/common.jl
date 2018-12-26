@@ -3,8 +3,8 @@ mutable struct gRPCController <: ProtoRpcController
     debug::Bool
 end
 
-debug_log(controller::gRPCController, msg) = controller.debug && println(msg)
-error_log(controller::gRPCController, msg) = println(STDERR, msg)
+debug_log(controller::gRPCController, msg) = controller.debug && @debug(msg)
+error_log(controller::gRPCController, msg) = @error(msg)
 
 # gRPCChannel implementation
 mutable struct gRPCChannel <: ProtoRpcChannel
