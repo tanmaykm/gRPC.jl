@@ -7,12 +7,12 @@ function write_request(channel::gRPCChannel, controller::gRPCController, service
                       "content-type" => "application/grpc+proto")
 
     channel.stream_id = Session.next_free_stream_identifier(connection)
-    debug_log(controller, "Stream Id: $(channel.stream_id)")
+    @debug("writing request", stream_id=channel.stream_id)
     Session.put_act!(connection, Session.ActSendHeaders(channel.stream_id, headers, false))
     data_buff = to_delimited_message_bytes(request)
     Session.put_act!(channel.session, Session.ActSendData(channel.stream_id, data_buff, true))
 
-    debug_log(controller, "sent data $(length(data_buff)) bytes")
+    @debug("wrote request", stream_id=channel.stream_id, nbytes=length(data_buff))
     nothing
 end
 
@@ -22,22 +22,21 @@ function read_response(channel::gRPCChannel, controller::gRPCController, respons
     evt = Session.take_evt!(connection)
 
     if !isa(evt, EvtRecvHeaders)
-        debug_log(controller, "unexpected event $evt")
+        @warn("unexpected event while reading response (closing channel)", evt)
         close(channel)
         return response
     end
 
-    debug_log(controller, "got stream id: $(evt.stream_identifier)")
-    debug_log(controller, "channel stream id: $(channel.stream_id)")
+    @debug("read response", event_stream_id=evt.stream_identifier, channel_stream_id=channel.stream_id)
 
     headers = evt.headers
-    debug_log(controller, "received_headers: $headers")
+    @debug("read response", headers)
     assert_http_status(headers)
     ret, err = assert_grpc_status(headers)
     # check if we received only trailer headers, then there is no response to send
     (ret == 0) && (return response)
 
-    debug_log(controller, "reading next evt (data/trailer)")
+    @debug("reading next evt (data/trailer)")
     evt = Session.take_evt!(connection)
     if isa(evt, EvtRecvData)
         data = evt.data
@@ -47,11 +46,11 @@ function read_response(channel::gRPCChannel, controller::gRPCController, respons
         return response
     end
 
-    debug_log(controller, "reading next evt (trailer)")
+    @debug("reading next evt (trailer)")
     evt = Session.take_evt!(connection)
 
     if !isa(evt, EvtRecvHeaders)
-        debug_log(controller, "unexpected event $evt")
+        @warn("unexpected event while reading response (closing channel)", evt)
         close(channel)
         return response
     end

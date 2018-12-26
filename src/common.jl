@@ -1,10 +1,6 @@
-# gRPCController only keeps a debug flag as of now
-mutable struct gRPCController <: ProtoRpcController
-    debug::Bool
+# gRPCController only a placeholder as of now
+struct gRPCController <: ProtoRpcController
 end
-
-debug_log(controller::gRPCController, msg) = controller.debug && @debug(msg)
-error_log(controller::gRPCController, msg) = @error(msg)
 
 # gRPCChannel implementation
 mutable struct gRPCChannel <: ProtoRpcChannel

@@ -3,13 +3,13 @@ function read_request(channel::gRPCChannel, controller::gRPCController, services
     evt = Session.take_evt!(connection)
 
     if isa(evt, EvtGoaway)
-        debug_log(controller, "received EvtGoaway")
+        @debug("received EvtGoaway")
         close(channel)
         return (nothing, nothing, nothing)
     end
 
     if !isa(evt, EvtRecvHeaders)
-        debug_log(controller, "unexpected event $evt")
+        @debug("unexpected event while reading request (closing channel)", evt)
         close(channel)
         return (nothing, nothing, nothing)
     end
@@ -21,7 +21,7 @@ function read_request(channel::gRPCChannel, controller::gRPCController, services
     path = headers[":path"]
     pathcomps = split(path, "/"; keep=false)
     if length(pathcomps) != 2
-        debug_log(controller, "unexpected path $path")
+        @debug("unexpected path while reading request (closing channel)", path)
         close(channel)
         return (nothing, nothing, nothing)
     end
@@ -35,11 +35,7 @@ function read_request(channel::gRPCChannel, controller::gRPCController, services
         data = data_evt.data
     end
 
-    debug_log(controller, "request: $method $path")
-    debug_log(controller, "stream: $(channel.stream_id)")
-    debug_log(controller, "service: $servicename")
-    debug_log(controller, "method: $methodname")
-    debug_log(controller, "data: $(length(data)) bytes")
+    @debug("received request", method, path, stream_id=channel.stream_id, servicename, methodname, nbytes=length(data))
 
     service = services[servicename]
     method = find_method(service, methodname)
@@ -66,7 +62,6 @@ mutable struct gRPCServer
     sock::TCPServer
     services::Dict{String, ProtoService}
     run::Bool
-    debug::Bool
 
     gRPCServer(services::Tuple{ProtoService}, ip::IPv4, port::Integer) = gRPCServer(services, listen(ip, port))
     gRPCServer(services::Tuple{ProtoService}, port::Integer) = gRPCServer(services, listen(port))
@@ -75,7 +70,7 @@ mutable struct gRPCServer
         for svc in services
             svcdict[svc.desc.name] = svc
         end
-        new(sock, svcdict, true, false)
+        new(sock, svcdict, true)
     end
 end
 
@@ -83,25 +78,25 @@ end
 close(srvr::gRPCServer) = close(srvr.sock)
 
 function process(controller::gRPCController, srvr::gRPCServer, channel::gRPCChannel)
-    debug_log(controller, "start processing channel")
+    @info("start processing channel")
     try
         while(!channel.session.closed)
             service, method, request = read_request(channel, controller, srvr.services)
             (service === nothing) && continue
 
             response = call_method(service, method, controller, request)
-            #debug_log(controller, "response: $response")
+            #@debug("response from method", response)
             write_response(channel, controller, response)
         end
     catch ex
-        debug_log(controller, "channel stopped with exception $ex")
+        @warn("channel stopped with exception", ex)
     end
     # TODO: close channel if not closed, remove reference from srvr
-    debug_log(controller, "stopped processing channel")
+    @info("stopped processing channel")
 end
 
 function run(srvr::gRPCServer)
-    controller = gRPCController(srvr.debug)
+    controller = gRPCController()
     try
         while(srvr.run)
             buffer = accept(srvr.sock)
@@ -112,7 +107,7 @@ function run(srvr::gRPCServer)
             @async process(controller, srvr, channel)
         end
     catch ex
-        debug_log(controller, "server stopped with exception $ex")
+        @warn("server stopped with exception", ex)
     end
-    debug_log(controller, "stopped server")
+    @info("stopped server")
 end
