@@ -11,7 +11,7 @@ notifications:
 # uncomment the following lines to override the default test script
 script: # the default script is equivalent to the following
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-  - julia -e 'using Pkg; Pkg.clone("https://github.com/sorpaas/HPack.jl.git"); Pkg.clone("https://github.com/sorpaas/HTTP2.jl.git"); Pkg.clone(pwd()); Pkg.build("gRPC"); Pkg.test("gRPC"; coverage=true)';
+  - julia -e 'using Pkg; Pkg.clone("https://github.com/tanmaykm/HPack.jl.git"); Pkg.clone("https://github.com/tanmaykm/HTTP2.jl.git"); Pkg.clone(pwd()); Pkg.build("gRPC"); Pkg.test("gRPC"; coverage=true)';
 #script:
 #  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
 #  - julia -e 'Pkg.clone(pwd()); Pkg.build("gRPC"); Pkg.test("gRPC"; coverage=true)'
