@@ -3,6 +3,7 @@ struct gRPCController <: ProtoRpcController
 end
 
 # gRPCChannel implementation
+# handles only one stream as of now
 mutable struct gRPCChannel <: ProtoRpcChannel
     session::HTTPConnection
     stream_id::UInt32

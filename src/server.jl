@@ -47,12 +47,19 @@ function read_request(channel::gRPCChannel, controller::gRPCController, services
 end
 
 function write_response(channel::gRPCChannel, controller::gRPCController, response)
-    sending_headers = Headers(":status" => "200")
+    sending_headers = [(":status", "200")]
     data_buff = to_delimited_message_bytes(response)
 
     Session.put_act!(channel.session, Session.ActSendHeaders(channel.stream_id, sending_headers, false))
     Session.put_act!(channel.session, Session.ActSendData(channel.stream_id, data_buff, true))
     nothing
+end
+
+function call_method(channel::gRPCChannel, service::ServiceDescriptor, method::MethodDescriptor, controller::gRPCController, request)
+    write_request(channel, controller, service, method, request)
+    response_type = get_response_type(method)
+    response = response_type()
+    read_response(channel, controller, response)
 end
 
 

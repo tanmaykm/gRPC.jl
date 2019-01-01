@@ -1,10 +1,10 @@
 function write_request(channel::gRPCChannel, controller::gRPCController, service::ServiceDescriptor, method::MethodDescriptor, request)
     connection = channel.session
     path = "/" * service.name * "/" * method.name
-    headers = Headers(":method" => "POST",
-                      ":path" => path,
-                      ":scheme" => "http",
-                      "content-type" => "application/grpc+proto")
+    headers = [(":method", "POST"),
+               (":path", path),
+               (":scheme", "http"),
+               ("content-type", "application/grpc+proto")]
 
     channel.stream_id = Session.next_free_stream_identifier(connection)
     @debug("writing request", stream_id=channel.stream_id)
@@ -57,13 +57,6 @@ function read_response(channel::gRPCChannel, controller::gRPCController, respons
 
     assert_grpc_status(evt.headers)
     return response
-end
-
-function call_method(channel::gRPCChannel, service::ServiceDescriptor, method::MethodDescriptor, controller::gRPCController, request)
-    write_request(channel, controller, service, method, request)
-    response_type = get_response_type(method)
-    response = response_type()
-    read_response(channel, controller, response)
 end
 
 # gRPC client implementation
