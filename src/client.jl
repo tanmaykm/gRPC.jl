@@ -1,4 +1,8 @@
-function write_request(channel::gRPCChannel, controller::gRPCController, service::ServiceDescriptor, method::MethodDescriptor, request)
+function write_request(channel::gRPCChannel,
+                       controller::gRPCController,
+                       service::ServiceDescriptor,
+                       method::MethodDescriptor,
+                       request)
     connection = channel.session
     path = "/" * service.name * "/" * method.name
     headers = [(":method", "POST"),
@@ -27,7 +31,9 @@ function read_response(channel::gRPCChannel, controller::gRPCController, respons
         return response
     end
 
-    @debug("read response", event_stream_id=evt.stream_identifier, channel_stream_id=channel.stream_id)
+    @debug("read response",
+           event_stream_id=evt.stream_identifier,
+           channel_stream_id=channel.stream_id)
 
     headers = evt.headers
     @debug("read response", headers)
