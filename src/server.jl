@@ -35,7 +35,8 @@ function read_request(channel::gRPCChannel, controller::gRPCController, services
         data = data_evt.data
     end
 
-    @debug("received request", method, path, stream_id=channel.stream_id, servicename, methodname, nbytes=length(data))
+    @debug("received request", method, path, stream_id=channel.stream_id, servicename,
+           methodname, nbytes=length(data))
 
     service = services[servicename]
     method = find_method(service, methodname)
@@ -50,12 +51,18 @@ function write_response(channel::gRPCChannel, controller::gRPCController, respon
     sending_headers = [(":status", "200")]
     data_buff = to_delimited_message_bytes(response)
 
-    Session.put_act!(channel.session, Session.ActSendHeaders(channel.stream_id, sending_headers, false))
-    Session.put_act!(channel.session, Session.ActSendData(channel.stream_id, data_buff, true))
+    Session.put_act!(channel.session,
+                     Session.ActSendHeaders(channel.stream_id, sending_headers, false))
+    Session.put_act!(channel.session,
+                     Session.ActSendData(channel.stream_id, data_buff, true))
     nothing
 end
 
-function call_method(channel::gRPCChannel, service::ServiceDescriptor, method::MethodDescriptor, controller::gRPCController, request)
+function call_method(channel::gRPCChannel,
+                     service::ServiceDescriptor,
+                     method::MethodDescriptor,
+                     controller::gRPCController,
+                     request)
     write_request(channel, controller, service, method, request)
     response_type = get_response_type(method)
     response = response_type()
@@ -70,8 +77,10 @@ mutable struct gRPCServer
     services::Dict{String, ProtoService}
     run::Bool
 
-    gRPCServer(services::Tuple{ProtoService}, ip::IPv4, port::Integer) = gRPCServer(services, listen(ip, port))
-    gRPCServer(services::Tuple{ProtoService}, port::Integer) = gRPCServer(services, listen(port))
+    gRPCServer(services::Tuple{ProtoService}, ip::IPv4, port::Integer) =
+        gRPCServer(services, listen(ip, port))
+    gRPCServer(services::Tuple{ProtoService}, port::Integer) =
+        gRPCServer(services, listen(port))
     function gRPCServer(services::Tuple{ProtoService}, sock::TCPServer)
         svcdict = Dict{String,ProtoService}()
         for svc in services
