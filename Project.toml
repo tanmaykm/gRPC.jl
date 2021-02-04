@@ -1,12 +1,9 @@
 name = "gRPC"
 uuid = "afc8a647-7d08-4745-b7bc-49733df17e1a"
-authors = ["Tanmay Mohapatra <tanmaykm@gmail.com>"]
 license = "MIT"
 desc = "gRPC protocol"
+authors = ["Tanmay Mohapatra <tanmaykm@gmail.com>"]
 version = "0.1.0"
-
-[extras]
-Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [deps]
 HTTP2 = "0ee529b6-85a9-4020-94aa-d5b2735f286b"
@@ -14,7 +11,11 @@ ProtoBuf = "3349acd9-ac6a-5e09-bcdb-63829b23a429"
 Sockets = "6462fe0b-24de-5631-8697-dd941f90decc"
 
 [compat]
+ProtoBuf = "0.10"
 julia = "1.5"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
 test = ["Test"]
