@@ -11,7 +11,7 @@ ProtoBuf = "3349acd9-ac6a-5e09-bcdb-63829b23a429"
 Sockets = "6462fe0b-24de-5631-8697-dd941f90decc"
 
 [compat]
-ProtoBuf = "0.10"
+ProtoBuf = "0.10, 0.11"
 julia = "1.5"
 
 [extras]
