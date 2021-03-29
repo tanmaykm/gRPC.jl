@@ -66,7 +66,7 @@ function read_response(channel::gRPCChannel, controller::gRPCController, respons
 end
 
 # gRPC client implementation
-# 
+#
 mutable struct gRPCClient
     sock::TCPSocket
     channel::gRPCChannel
@@ -79,6 +79,15 @@ mutable struct gRPCClient
         new(buffer, channel)
     end
 end
+
+# Constructor with the address as a String
+function gRPCClient(ip::String, port::Integer)
+    ip_adress = parse(IPAddr,ip)
+    gRPCClient(ip_adress,port)
+end
+
+Base.print(io::IO, client::gRPCClient) = Base.print(io,"gRPCClient($(client.sock))")
+Base.show(io::IO, client::gRPCClient) = Base.print(io, client)
 
 close(client::gRPCClient) = close(client.channel)
 stub(client::gRPCClient, stubfn) = stubfn(client.channel)
